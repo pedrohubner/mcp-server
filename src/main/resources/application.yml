@@ -1,0 +1,27 @@
+server:
+  port: 9000
+
+spring:
+  ai:
+    mcp:
+      server:
+        name: mcp-server
+        protocol: STREAMABLE
+        type: SYNC
+        enabled: true
+        version: "1.0.0"
+        annotation-scanner:
+          enabled: true
+        streamable-http:
+          mcp-endpoint: /mcp
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=30m
+  application:
+    name: mcp-server
+
+rest-client:
+  github:
+    url: https://api.github.com
+    token:
