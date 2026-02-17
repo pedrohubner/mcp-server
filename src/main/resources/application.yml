@@ -9,6 +9,7 @@ spring:
         protocol: STREAMABLE
         type: SYNC
         enabled: true
+        resource-change-notification: true
         version: "1.0.0"
         annotation-scanner:
           enabled: true
@@ -25,3 +26,10 @@ rest-client:
   github:
     url: https://api.github.com
     token:
+
+resources:
+  refresh:
+    scheduler:
+      enabled: true
+      initial-delay: PT10S
+      fixed-delay: PT3M
