@@ -1,58 +1,61 @@
 package com.pedrohubner.mcpserver.resources;
 
 import com.pedrohubner.mcpserver.resources.dto.GitHubRepoTree;
-import com.pedrohubner.mcpserver.resources.integration.ResourcesGitLabIntegration;
+import com.pedrohubner.mcpserver.resources.integration.GitHubResourcesIntegration;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncResourceSpecification;
 import io.modelcontextprotocol.spec.McpSchema;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ResourcesSpecificationFactory {
-
     public static final String RESOURCE_URI_PREFIX = "github://resources/";
 
-    public List<SyncResourceSpecification> buildMarkdownResourceSpecs(ResourcesGitLabIntegration integration,
-                                                                      List<GitHubRepoTree> files) {
+    private final GitHubResourcesIntegration integration;
+
+    public List<SyncResourceSpecification> buildMarkdownResourceSpecs(List<GitHubRepoTree> files) {
         return files.stream()
                 .filter(this::isMarkdownFile)
-                .map(item -> this.buildResourceSpec(integration, item))
+                .map(this::buildResourceSpec)
                 .toList();
     }
 
     private boolean isMarkdownFile(GitHubRepoTree item) {
-        return "file".equals(item.type())
-                && Objects.nonNull(item.name())
-                && item.name().toLowerCase().endsWith(".md");
+        return item.isMarkdownFile();
     }
 
-    private SyncResourceSpecification buildResourceSpec(ResourcesGitLabIntegration integration, GitHubRepoTree item) {
+    private SyncResourceSpecification buildResourceSpec(GitHubRepoTree item) {
         final var resource = this.buildSchema(item);
         return new SyncResourceSpecification(
                 resource,
-                (exchange, request) -> this.buildResourceResult(integration, item, request)
+                (exchange, request) -> this.buildResourceResult(item, request)
         );
     }
 
     private McpSchema.Resource buildSchema(GitHubRepoTree item) {
+        final var resourcePath = item.relativePathFromResources();
+        final var fileName = item.fileName();
+
         return McpSchema.Resource.builder()
-                .uri(RESOURCE_URI_PREFIX + item.name())
-                .name(item.name())
-                .description("Resource: " + item.name())
+                .uri(RESOURCE_URI_PREFIX + resourcePath)
+                .name(fileName)
+                .description("Resource: " + resourcePath)
                 .mimeType("text/markdown")
                 .build();
     }
 
-    private McpSchema.@NonNull ReadResourceResult buildResourceResult(ResourcesGitLabIntegration integration,
-                                                                      GitHubRepoTree item,
-                                                                      McpSchema.ReadResourceRequest request) {
-        log.info("MCP resource chamado: name={}, uri={}", item.name(), request.uri());
-        String content = integration.getFileContent(item.name());
+    private McpSchema.@NonNull ReadResourceResult buildResourceResult(
+            GitHubRepoTree item, McpSchema.ReadResourceRequest request
+    ) {
+        final var resourcePath = item.relativePathFromResources();
+        log.info("MCP resource chamado: path={}, uri={}", resourcePath, request.uri());
+        String content = integration.getFileContent(resourcePath);
         return new McpSchema.ReadResourceResult(
                 List.of(new McpSchema.TextResourceContents(request.uri(), "text/markdown", content))
         );

@@ -11,12 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "resources.refresh.scheduler.enabled", havingValue = "true", matchIfMissing = true)
 public class ResourcesRefreshScheduler {
-
     private final ResourcesRefreshService resourcesRefreshService;
 
     @Scheduled(
-            fixedDelayString = "${resources.refresh.scheduler.fixed-delay:PT30M}",
-            initialDelayString = "${resources.refresh.scheduler.initial-delay:PT2M}"
+            fixedDelayString = "${resources.refresh.scheduler.fixed-delay:PT3M}",
+            initialDelayString = "${resources.refresh.scheduler.initial-delay:PT10S}"
     )
     public void refresh() {
         log.info("Iniciando refresh agendado de resources.");
