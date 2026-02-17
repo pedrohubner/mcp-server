@@ -1,4 +1,4 @@
-package com.pedrohubner.mcp_server;
+package com.pedrohubner.mcpserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
