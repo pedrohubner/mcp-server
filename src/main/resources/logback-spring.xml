@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="ELASTIC_URL" value="${ELASTIC_URL:-http://localhost:9200/_bulk}" />
+    <property name="ELASTIC_INDEX_PREFIX" value="${ELASTIC_INDEX_PREFIX:-mcp-server-logs}" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <springProfile name="local">
+        <appender name="ELASTIC" class="com.agido.logback.elasticsearch.ElasticsearchAppender">
+            <url>${ELASTIC_URL}</url>
+            <index>${ELASTIC_INDEX_PREFIX}-%date{yyyy.MM.dd}</index>
+            <type>_doc</type>
+            <connectTimeout>2000</connectTimeout>
+            <readTimeout>3000</readTimeout>
+            <maxQueueSize>1048576</maxQueueSize>
+            <includeMdc>true</includeMdc>
+            <includeCallerData>false</includeCallerData>
+            <errorsToStderr>true</errorsToStderr>
+            <headers>
+                <header>
+                    <name>Content-Type</name>
+                    <value>application/json</value>
+                </header>
+                <header>
+                    <name>Accept</name>
+                    <value>application/json</value>
+                </header>
+            </headers>
+            <properties>
+                <esProperty>
+                    <name>level</name>
+                    <value>%level</value>
+                </esProperty>
+            </properties>
+
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="ELASTIC" />
+        </root>
+    </springProfile>
+
+    <springProfile name="!local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+    </springProfile>
+</configuration>
