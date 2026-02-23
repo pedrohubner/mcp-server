@@ -21,11 +21,15 @@ spring:
       spec: maximumSize=100,expireAfterWrite=30m
   application:
     name: mcp-server
+  profiles:
+    active: local
 
 rest-client:
   github:
     url: https://api.github.com
     token:
+  elasticsearch:
+    url: http://localhost:9200
 
 resources:
   refresh:
@@ -33,3 +37,8 @@ resources:
       enabled: true
       initial-delay: PT10S
       fixed-delay: PT3M
+
+stub:
+  logs:
+    enabled: true
+    total: 300
