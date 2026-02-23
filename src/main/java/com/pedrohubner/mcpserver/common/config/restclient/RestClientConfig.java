@@ -22,4 +22,13 @@ public class RestClientConfig {
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
+
+    @Bean
+    public RestClient elasticSearchRestClient() {
+        return RestClient.builder()
+                .baseUrl(properties.getElasticsearch().getUrl())
+                .defaultHeader("Accept", "application/json")
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
 }
